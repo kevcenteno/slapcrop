@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlapCrop", "SlapCrop\SlapCrop.csproj", "{97DB93E0-CFE9-4CB9-9E75-005C18BE5BBE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlapCrop.Tests", "SlapCrop.Tests\SlapCrop.Tests.csproj", "{236F389B-D54A-415E-83FA-4A311F6E058C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{97DB93E0-CFE9-4CB9-9E75-005C18BE5BBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97DB93E0-CFE9-4CB9-9E75-005C18BE5BBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97DB93E0-CFE9-4CB9-9E75-005C18BE5BBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97DB93E0-CFE9-4CB9-9E75-005C18BE5BBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{236F389B-D54A-415E-83FA-4A311F6E058C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{236F389B-D54A-415E-83FA-4A311F6E058C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{236F389B-D54A-415E-83FA-4A311F6E058C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{236F389B-D54A-415E-83FA-4A311F6E058C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
