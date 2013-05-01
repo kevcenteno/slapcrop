@@ -2,24 +2,24 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Drawing;
 
-namespace SlapCrop.Tests
+namespace SlapCrop.Tests.Components
 {
     [TestClass]
     public class ImageScalerTests
     {
+        private ImageScaler subject = new ImageScaler();
+
         [TestMethod]
         public void ImageScaler_HasDefaultFillColorSetToBlack()
         {
-            var scaler = new ImageScaler();
-            Assert.AreEqual(Color.Black, scaler.Options.DefaultFillColor);
+            Assert.AreEqual(Color.Black, this.subject.Options.DefaultFillColor);
         }
 
         [TestMethod]
         public void ImageScaler_ReturnsSourceImageWhenWidthAndHeightAreLarger()
         {
-            var scaler = new ImageScaler();
             var image = ResHelper.LoadImage("landscape.jpg");
-            var result = scaler.Scale(image, 601, 401);
+            var result = this.subject.Scale(image, 601, 401);
             Assert.IsNotNull(result);
             Assert.AreEqual(600, result.Width);
             Assert.AreEqual(400, result.Height);
@@ -29,9 +29,8 @@ namespace SlapCrop.Tests
         [TestMethod]
         public void ImageScaler_ReturnsScaledImageWhenAspectRatiosMatch()
         {
-            var scaler = new ImageScaler();
             var image = ResHelper.LoadImage("landscape.jpg");
-            var result = scaler.Scale(image, 300, 200);
+            var result = this.subject.Scale(image, 300, 200);
             Assert.IsNotNull(result);
             Assert.AreEqual(300, result.Width);
             Assert.AreEqual(200, result.Height);
@@ -41,9 +40,8 @@ namespace SlapCrop.Tests
         [TestMethod]
         public void ImageScaler_ReturnsLetterboxImageWhenAspectRatioIsOffForLandscape()
         {
-            var scaler = new ImageScaler();
             var image = ResHelper.LoadImage("landscape.jpg");
-            var result = scaler.Scale(image, 200, 200);            
+            var result = this.subject.Scale(image, 200, 200);            
             Assert.IsNotNull(result);
 
             var ratio = (float)result.Width / image.Width;
@@ -63,11 +61,10 @@ namespace SlapCrop.Tests
         [TestMethod]
         public void ImageScaler_ReturnsLetterboxImageWhenAspectRatioIsOffForLandscapeWithRed()
         {
-            var scaler = new ImageScaler();
-            scaler.Options.DefaultFillColor = Color.Red;
+            this.subject.Options.DefaultFillColor = Color.Red;
 
             var image = ResHelper.LoadImage("landscape.jpg");
-            var result = scaler.Scale(image, 200, 200);
+            var result = this.subject.Scale(image, 200, 200);
             Assert.IsNotNull(result);
 
             var ratio = (float)result.Width / image.Width;
@@ -87,9 +84,8 @@ namespace SlapCrop.Tests
         [TestMethod]
         public void ImageScaler_ReturnsLetterboxImageWhenAspectRatioIsOffForPortrait()
         {
-            var scaler = new ImageScaler();
             var image = ResHelper.LoadImage("portrait.jpg");
-            var result = scaler.Scale(image, 200, 200);
+            var result = this.subject.Scale(image, 200, 200);
             Assert.IsNotNull(result);
 
             var ratio = (float)result.Height / image.Height;
