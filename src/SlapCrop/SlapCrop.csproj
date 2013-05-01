@@ -50,6 +50,7 @@
     <Compile Include="Components\ImageScaler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Support\ImageConfigSection.cs" />
+    <Compile Include="Support\ImageCropSpec.cs" />
     <Compile Include="Support\ImageProcessArgs.cs" />
     <Compile Include="Support\ImageProcessTarget.cs" />
     <Compile Include="Support\ImageScalerOptions.cs" />

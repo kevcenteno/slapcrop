@@ -16,7 +16,7 @@ namespace SlapCrop.Tests.Support
         [TestMethod]
         public void ImageProcessArgs_DeterminesSizes()
         {
-            var args = "sz=1x1;2x2;3x3;4x4;&mbr=1&cropspec=tl,1,1";
+            var args = "sz=1x1;2x2;3x3;4x4;&mbr=ipad&cropspec=tl,1,1";
             this.subject.Parse(args);
 
             Assert.AreEqual(4, this.subject.Sizes.Length);
@@ -28,9 +28,23 @@ namespace SlapCrop.Tests.Support
         }
 
         [TestMethod]
+        public void ImageProcessArgs_ScalesValuesByDensity()
+        {
+            var args = "sz=1x1;2x2;3x3;4x4;&mbr=ipad@2x&cropspec=tl,1,1";
+            this.subject.Parse(args);
+
+            Assert.AreEqual(4, this.subject.Sizes.Length);
+            for (int i = 1; i <= 4; i++)
+            {
+                Assert.AreEqual(i * 2, this.subject.Sizes[i - 1].Width);
+                Assert.AreEqual(i * 2, this.subject.Sizes[i - 1].Height);
+            }
+        }
+
+        [TestMethod]
         public void ImageProcessArgs_DeterminesMediaBreakpoint()
         {
-            var args = "sz=1x1;2x2;3x3;4x4;&mbr=1&cropspec=tl,1,1";
+            var args = "sz=1x1;2x2;3x3;4x4;&mbr=ipad&cropspec=tl,1,1";
             this.subject.Parse(args);
 
             Assert.AreEqual(1, this.subject.MediaBreakpoint);
@@ -48,7 +62,7 @@ namespace SlapCrop.Tests.Support
         [TestMethod]
         public void ImageProcessArgs_CreatesTargetObject()
         {
-            var args = "sz=1x1;2x2;3x3;4x4;&mbr=1&cropspec=tl,.5,.5";
+            var args = "sz=1x1;2x2;3x3;4x4;&mbr=ipad&cropspec=tl,.5,.5";
             this.subject.Parse(args);
 
             var target = this.subject.CreateTarget();

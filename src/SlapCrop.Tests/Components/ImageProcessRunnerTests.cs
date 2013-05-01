@@ -119,7 +119,7 @@ namespace SlapCrop.Tests.Components
         [TestMethod]
         public void ImageProcessRunner_ReturnsScaledImageWhenSizesSpecifiedWithQueryBreakPoint()
         {
-            var request = new HttpRequest("somehandler.ashx", "http://localhost:8080/assets/square.jpg", "sz=60x60;90x90;120x120;180x180&mbr=1");
+            var request = new HttpRequest("somehandler.ashx", "http://localhost:8080/assets/square.jpg", "sz=60x60;90x90;120x120;180x180&mbr=ipad");
             
             this.MockRequest(request, (ms, mockResponse, mockContext) =>
             {
@@ -147,7 +147,7 @@ namespace SlapCrop.Tests.Components
         [TestMethod]
         public void ImageProcessRunner_ScalesAndCropsImage()
         {
-            var request = new HttpRequest("somehandler.ashx", "http://localhost:8080/assets/square.jpg", "sz=90x90;100x100&cropspec=bl,0.5,0.5&mbr=0");
+            var request = new HttpRequest("somehandler.ashx", "http://localhost:8080/assets/square.jpg", "sz=90x90;100x100&cropspec=bl,0.5,0.5&mbr=iphone");
 
             this.MockRequest(request, (ms, mockResponse, mockContext) =>
             {
@@ -171,7 +171,7 @@ namespace SlapCrop.Tests.Components
         [TestMethod]
         public void ImageProcessRunner_ScalesAndCropsImageExceptWhenToldToSkip()
         {
-            var request = new HttpRequest("somehandler.ashx", "http://localhost:8080/assets/square.jpg", "sz=90x90;100x100&cropspec=skip;tc,0.5,0.5&mbr=0");
+            var request = new HttpRequest("somehandler.ashx", "http://localhost:8080/assets/square.jpg", "sz=90x90;100x100&cropspec=skip;tc,0.5,0.5&mbr=iphone");
 
             this.MockRequest(request, (ms, mockResponse, mockContext) =>
             {

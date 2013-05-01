@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using System;
+using System.Web;
 
 namespace SlapCrop
 {
@@ -29,8 +30,16 @@ namespace SlapCrop
         /// </remarks>
         public void ProcessRequest(HttpContextBase context)
         {
-            var process = this.GetProcessRunner(context);
-            process.HandleRequest();
+            try
+            {
+                var process = this.GetProcessRunner(context);
+                process.HandleRequest();
+            }
+            catch (ArgumentOutOfRangeException aor)
+            {
+                // thrown when sizes are bad
+                throw new HttpException(400, aor.Message);
+            }
         }
 
         /// <summary>
