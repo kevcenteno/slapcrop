@@ -22,7 +22,7 @@ namespace SlapCrop
         /// Scales an image to the target width and height
         /// <para>
         /// If either the width or the height supplied are larger than the respective values of <paramref name="image"/>, 
-        /// a copy of the original image will be returned.
+        /// a <see cref="ArgumentOutOfRangeException"/> will be thrown
         /// </para>
         /// <para>
         /// If the width and height maintain the original aspect ratio a new image will be returned with an scaled version of the original
@@ -36,12 +36,13 @@ namespace SlapCrop
         /// <param name="width">The new width</param>
         /// <param name="height">The new height</param>
         /// <returns>The scaled image or <paramref name="image"/></returns>
+        /// <exception cref="ArgumentOutOfRangeException">thrown when either the width or height is larger then the source width or height</exception>
         public Bitmap Scale(Bitmap image, int width, int height)
         {
-            // guard clause for up-scaling: return a copy of the original
+            // guard clause for up-scaling: freak out!
             if (this.IsLargerThanSource(image, width, height) || new Size(width, height) == Size.Empty)
             {
-                return new Bitmap(image);
+                throw new ArgumentOutOfRangeException("Either the width or height are larger than the source image", (Exception)null);
             }
 
             var scaled = new Bitmap(width, height);
@@ -60,7 +61,7 @@ namespace SlapCrop
 
         private bool IsLargerThanSource(Bitmap image, int width, int height)
         {
-            return width >= image.Width && height >= image.Height;
+            return width > image.Width || height > image.Height;
         }
 
         private bool IsLandscape(Bitmap image)

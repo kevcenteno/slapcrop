@@ -101,10 +101,10 @@ namespace SlapCrop
 
             if (pairs.ContainsKey(MBR_PARAM))
             {
-                int mbr = 0;
-                if (int.TryParse(pairs[MBR_PARAM], out mbr))
+                var key = pairs[MBR_PARAM];
+                if (!string.IsNullOrEmpty(key))
                 {
-                    this.MediaBreakpoint = mbr;
+                    this.MediaBreakpoint = int.Parse(ImageConfigSection.Instance.Breakpoints[key].Value);
                 }
             }
         }

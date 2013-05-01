@@ -16,6 +16,25 @@ namespace SlapCrop.Tests
         // the maximum number of pixels we can be off by (due to rounding)
         private int _acceptableVariance = 200;
 
+        #region [Image Scaler Tests]
+
+        [TestMethod]
+        [ExpectedException(typeof(HttpException))]
+        public void ImageHandler_Returns400WhenRequestedWidthIsLargerThanSource()
+        {
+            // source image is 200x200, last value (requested) is too big
+            var queryString = "sz=10x10;20x20;30x30;300x200&cropspec=c,.5,.5";
+
+            // a 404 should be thrown here...
+            this.ValidateCroppedImage(queryString, new Size(200, 200), (image) =>
+            {
+                // should never get here...
+                Assert.IsFalse(true);
+            });
+        }
+
+        #endregion
+
         #region [Image Cropping Tests]
 
         [TestMethod]
@@ -33,7 +52,7 @@ namespace SlapCrop.Tests
         [TestMethod]
         public void ImageHandler_ReturnsCroppedImageForSize_TopLeft()
         {
-            var queryString = "sz=10x10;20x20;200x200;200x200&cropspec=skip;skip;tl,.5,.5;skip&mbr=2";
+            var queryString = "sz=10x10;20x20;200x200;200x200&cropspec=skip;skip;tl,.5,.5;skip&mbr=ipad-landscape";
 
             this.ValidateCroppedImage(queryString, new Size(100, 100), (image) =>
             {
@@ -53,7 +72,7 @@ namespace SlapCrop.Tests
         [TestMethod]
         public void ImageHandler_ReturnsCroppedImageForSize_TopCenter()
         {
-            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=tc,.5,.5&mbr=3";
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=tc,.5,.5&mbr=desktop";
 
             this.ValidateCroppedImage(queryString, new Size(100, 100), (image) =>
             {
@@ -70,7 +89,7 @@ namespace SlapCrop.Tests
         [TestMethod]
         public void ImageHandler_ReturnsCroppedImageForSize_TopRight()
         {
-            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=tr,.5,.5&mbr=3";
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=tr,.5,.5&mbr=desktop";
 
             this.ValidateCroppedImage(queryString, new Size(100, 100), (image) =>
             {
@@ -90,7 +109,7 @@ namespace SlapCrop.Tests
         [TestMethod]
         public void ImageHandler_ReturnsCroppedImageForSize_LeftCenter()
         {
-            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=lc,.5,.5&mbr=2";
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=lc,.5,.5&mbr=ipad-landscape";
 
             this.ValidateCroppedImage(queryString, new Size(50, 50), (image) =>
             {
@@ -107,7 +126,7 @@ namespace SlapCrop.Tests
         [TestMethod]
         public void ImageHandler_ReturnsCroppedImageForSize_Center()
         {
-            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=c,.5,.5&mbr=2";
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=c,.5,.5&mbr=ipad-landscape";
 
             this.ValidateCroppedImage(queryString, new Size(50, 50), (image) =>
             {
@@ -120,7 +139,7 @@ namespace SlapCrop.Tests
         [TestMethod]
         public void ImageHandler_ReturnsCroppedImageForSize_RightCenter()
         {
-            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=rc,.5,.5&mbr=2";
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=rc,.5,.5&mbr=ipad-landscape";
 
             this.ValidateCroppedImage(queryString, new Size(50, 50), (image) =>
             {
@@ -137,7 +156,7 @@ namespace SlapCrop.Tests
         [TestMethod]
         public void ImageHandler_ReturnsCroppedImageForSize_BottomLeft()
         {
-            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=bl,.5,.5&mbr=2";
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=bl,.5,.5&mbr=ipad-landscape";
 
             this.ValidateCroppedImage(queryString, new Size(50, 50), (image) =>
             {
@@ -157,7 +176,7 @@ namespace SlapCrop.Tests
         [TestMethod]
         public void ImageHandler_ReturnsCroppedImageForSize_BottomCenter()
         {
-            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=bc,.5,.5&mbr=2";
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=bc,.5,.5&mbr=ipad-landscape";
 
             this.ValidateCroppedImage(queryString, new Size(50, 50), (image) =>
             {
@@ -174,7 +193,7 @@ namespace SlapCrop.Tests
         [TestMethod]
         public void ImageHandler_ReturnsCroppedImageForSize_BottomRight()
         {
-            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=br,.5,.5&mbr=2";
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=br,.5,.5&mbr=ipad-landscape";
 
             this.ValidateCroppedImage(queryString, new Size(50, 50), (image) =>
             {

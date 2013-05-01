@@ -16,14 +16,21 @@ namespace SlapCrop.Tests.Components
         }
 
         [TestMethod]
-        public void ImageScaler_ReturnsSourceImageWhenWidthAndHeightAreLarger()
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void ImageScaler_ThrowsExceptionWhenWidthIsTooLarger()
         {
             var image = ResHelper.LoadImage("landscape.jpg");
-            var result = this.subject.Scale(image, 601, 401);
+            var result = this.subject.Scale(image, 601, 200);
             Assert.IsNotNull(result);
-            Assert.AreEqual(600, result.Width);
-            Assert.AreEqual(400, result.Height);
-            Assert.AreEqual(0, ResHelper.PixelCount(result, Color.Black));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void ImageScaler_ThrowsExceptionWhenHeightIsTooLarger()
+        {
+            var image = ResHelper.LoadImage("landscape.jpg");
+            var result = this.subject.Scale(image, 200, 401);
+            Assert.IsNotNull(result);
         }
 
         [TestMethod]
