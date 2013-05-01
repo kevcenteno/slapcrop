@@ -1,1 +1,74 @@
-Slap Crop
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="SlapCrop! : An image resizer tool for .NET" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>SlapCrop!</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/ShawONEX/slapcrop">View on GitHub</a>
+
+          <h1 id="project_title">SlapCrop!</h1>
+          <h2 id="project_tagline">An image resizer tool for .NET</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/ShawONEX/slapcrop/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/ShawONEX/slapcrop/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>SlapCrop!</h1>
+
+        <p>SlapCrop is an image resizer tool written by the development team at <a href="http://www.shawmedia.ca/" title="Shaw Media">Shaw Media, Inc</a>. in Toronto, Canada.</p>
+
+        <p>The goal is to offer dynamic scaling and cropping of images in both 1 and 2 pixel density scenarios in order to support our multi-screen applications.</p>
+
+        <section>
+          # Setting Up SlapCrop
+
+          * Add a reference to SlapCrop.dll in your project
+          * Update web.config with your settings
+          * Test drive the image handler
+
+          ## Updating web.config
+
+          Add the following code to your web.config file
+
+              <configurationSectons>
+                <configSection name="SlapCrop" type="SlapCrop.ImageConfigSection, SlapCrop" />
+              </configurationSections>
+              ...
+              ...
+              <SlapCrop>
+              </SlapCrop>
+        </section>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">SlapCrop! maintained by <a href="https://github.com/ShawONEX">ShawONEX</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
