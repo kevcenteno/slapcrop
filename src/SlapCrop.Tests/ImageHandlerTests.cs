@@ -6,196 +6,251 @@ using System.Drawing;
 using System.IO;
 using Moq;
 using System.Configuration;
+using SlapCrop.Tests.Mocks;
 
 namespace SlapCrop.Tests
 {
     [TestClass]
     public class ImageHandlerTests
     {
-        [TestMethod]
-        public void ImageHandler_SetsContentTypeBasedOnImageFileExtension()
-        {            
-            // jpeg, gif and png
-            this.VerifyContentType("http://localhost:8080/assets/square.jpg", "image/jpeg");
-            this.VerifyContentType("http://localhost:8080/assets/sample.gif", "image/gif");
-            this.VerifyContentType("http://localhost:8080/assets/sample.png", "image/png");
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(HttpException))]
-        public void ImageHandler_Returns404WhenImageIsNotFound()
-        {
-            var request = new HttpRequest("somehandler.ashx", "http://localhost:8080/assets/NOTREAL.jpg", "");
-
-            this.MockRequest(request, (ms, mockResponse, mockContext) =>
-            {
-                var context = mockContext.Object;
-                new TestImageHandler().ProcessRequest(context);
-            });
-        }
-
-        #region [Scaling Request Tests]
-
-        [TestMethod]
-        public void ImageHandler_ReturnsSourceImageWhenNoParametersSupplied()
-        {
-            var request = new HttpRequest("somehandler.ashx", "http://localhost:8080/assets/square.jpg", "");
-
-            this.MockRequest(request, (ms, mockResponse, mockContext) =>
-            {
-                mockResponse.Setup(m => m.StatusCode).Returns(200);
-                mockResponse.Setup(m => m.ContentType).Returns("image/jpeg");
-
-                var context = mockContext.Object;
-                new TestImageHandler().ProcessRequest(context);
-                ms.Seek(0, SeekOrigin.Begin);
-
-                Assert.AreEqual(200, context.Response.StatusCode);
-                Assert.AreEqual("image/jpeg", context.Response.ContentType);
-
-                var image = Bitmap.FromStream(context.Response.OutputStream) as Bitmap;
-                Assert.AreEqual(300, image.Width);
-                Assert.AreEqual(300, image.Height);
-                Assert.AreEqual(0, ResHelper.PixelCount(image, Color.Black));
-                Assert.AreEqual(300 * 300, ResHelper.PixelCount(image, Color.White));
-            });
-        }
-
-        [TestMethod]
-        public void ImageHandler_ReturnsLetterboxedImageWhenSizesAreOfDifferentAspectRatio()
-        {
-            var request = new HttpRequest("somehandler.ashx", "http://localhost:8080/assets/square.jpg", "sz=60x60;90x90;120x120;180x120");
-
-            this.MockRequest(request, (ms, mockResponse, mockContext) =>
-            {
-                mockResponse.Setup(m => m.StatusCode).Returns(200);
-                mockResponse.Setup(m => m.ContentType).Returns("image/jpeg");
-
-                var context = mockContext.Object;
-                new TestImageHandler().ProcessRequest(context);
-                ms.Seek(0, SeekOrigin.Begin);
-                
-                Assert.AreEqual(200, context.Response.StatusCode);
-                Assert.AreEqual("image/jpeg", context.Response.ContentType);
-
-                var image = Bitmap.FromStream(context.Response.OutputStream) as Bitmap;
-                Assert.AreEqual(180, image.Width);
-                Assert.AreEqual(120, image.Height);
-
-                var config = ConfigurationManager.GetSection("SlapCrop") as ImageConfigSection;
-                Assert.IsNotNull(config);
-
-                var color = ColorUtil.MakeColorFromHex(config.FillColor);
-                Assert.AreNotEqual(0, ResHelper.PixelCount(image, color));
-            });
-        }
-
-        [TestMethod]
-        public void ImageHandler_ReturnsLargestImageWhenSizesSpecifiedWithoutQueryBreakPoint()
-        {
-            var request = new HttpRequest("somehandler.ashx", "http://localhost:8080/assets/square.jpg", "sz=60x60;90x90;120x120;180x180");
-
-            this.MockRequest(request, (ms, mockResponse, mockContext) =>
-            {
-                mockResponse.Setup(m => m.StatusCode).Returns(200);
-                mockResponse.Setup(m => m.ContentType).Returns("image/jpeg");
-
-                var context = mockContext.Object;
-                new TestImageHandler().ProcessRequest(context);
-                ms.Seek(0, SeekOrigin.Begin);
-
-                Assert.AreEqual(200, context.Response.StatusCode);
-                Assert.AreEqual("image/jpeg", context.Response.ContentType);
-
-                var image = Bitmap.FromStream(context.Response.OutputStream) as Bitmap;
-                Assert.AreEqual(180, image.Width);
-                Assert.AreEqual(180, image.Height);
-                Assert.AreEqual(0, ResHelper.PixelCount(image, Color.Black));
-            });
-        }
-
-        [TestMethod]
-        public void ImageHandler_ReturnsScaledImageWhenSizesSpecifiedWithQueryBreakPoint()
-        {
-            var request = new HttpRequest("somehandler.ashx", "http://localhost:8080/assets/square.jpg", "sz=60x60;90x90;120x120;180x180&qbr=1");
-
-            this.MockRequest(request, (ms, mockResponse, mockContext) =>
-            {
-                mockResponse.Setup(m => m.StatusCode).Returns(200);
-                mockResponse.Setup(m => m.ContentType).Returns("image/jpeg");
-
-                var context = mockContext.Object;
-                new TestImageHandler().ProcessRequest(context);
-                ms.Seek(0, SeekOrigin.Begin);
-
-                Assert.AreEqual(200, context.Response.StatusCode);
-                Assert.AreEqual("image/jpeg", context.Response.ContentType);
-
-                var image = Bitmap.FromStream(context.Response.OutputStream) as Bitmap;
-                Assert.AreEqual(90, image.Width);
-                Assert.AreEqual(90, image.Height);
-                Assert.AreEqual(0, ResHelper.PixelCount(image, Color.Black));
-            });
-        }
-
-        #endregion
+        // the maximum number of pixels we can be off by (due to rounding)
+        private int _acceptableVariance = 200;
 
         #region [Image Cropping Tests]
 
         [TestMethod]
         public void ImageHandler_ReturnsCroppedImageForMaxSizeWithoutQueryBreakPoint()
         {
-            var queryString = "sz=10x10;20x20;30x30;100x100&crop=c";
+            var queryString = "sz=10x10;20x20;30x30;200x200&cropspec=c,.5,.5";
 
             this.ValidateCroppedImage(queryString, new Size(100, 100), (image) =>
             {
-                // should be all black (allowing 100 as epsilon in case of rounding)
-                Assert.AreEqual(0, ResHelper.PixelCount(image, Color.White), image.Width); 
+                // should be all black 
+                Assert.AreEqual(0, ResHelper.PixelCount(image, Color.White), this._acceptableVariance);
             });
         }
 
         [TestMethod]
         public void ImageHandler_ReturnsCroppedImageForSize_TopLeft()
         {
-            var queryString = "sz=10x10;20x20;100x100;200x200&crop=tl&qbr=2";
+            var queryString = "sz=10x10;20x20;200x200;200x200&cropspec=skip;skip;tl,.5,.5;skip&mbr=2";
 
             this.ValidateCroppedImage(queryString, new Size(100, 100), (image) =>
             {
                 // bottom right quadrant should be black 
-                var rect = new Rectangle(50, 50, 50, 50);                
-                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.Black, rect), rect.Width + rect.Height);
+                var rect = this.GetImagePart(image.Size, ImagePart.BottomRightQuadrant);                
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.Black, rect), this._acceptableVariance);
+
+                // left half and bottom right should be white
+                rect = this.GetImagePart(image.Size, ImagePart.LeftHalf);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.White, rect), this._acceptableVariance);
+
+                rect = this.GetImagePart(image.Size, ImagePart.TopRightQuandrant);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.White, rect), this._acceptableVariance);
             });
         }
 
         [TestMethod]
         public void ImageHandler_ReturnsCroppedImageForSize_TopCenter()
         {
-            var queryString = "sz=10x10;20x20;100x100;200x200&crop=tc&qbr=2";
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=tc,.5,.5&mbr=3";
 
             this.ValidateCroppedImage(queryString, new Size(100, 100), (image) =>
-            {                
+            {
                 // bottom half should be black
-                var rect = new Rectangle(0, 50, 100, 50);
-                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.Black, rect), image.Width * 2);
+                var rect = this.GetImagePart(image.Size, ImagePart.BottomHalf);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.Black, rect), this._acceptableVariance);
+
+                // top half should be white
+                rect = this.GetImagePart(image.Size, ImagePart.TopHalf);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.White, rect), this._acceptableVariance);
             });
         }
 
         [TestMethod]
         public void ImageHandler_ReturnsCroppedImageForSize_TopRight()
         {
-            var queryString = "sz=10x10;20x20;100x100;200x200&crop=tr&qbr=2";
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=tr,.5,.5&mbr=3";
 
             this.ValidateCroppedImage(queryString, new Size(100, 100), (image) =>
             {
                 // bottom left quadrant should be black
-                var rect = new Rectangle(0, 50, 50, 50);
-                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.Black, rect), image.Width * 2);
+                var rect = this.GetImagePart(image.Size, ImagePart.BottomLeftQuadrant);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.Black, rect), this._acceptableVariance);
+
+                // top half and bottom right quadrant should be white
+                rect = this.GetImagePart(image.Size, ImagePart.TopHalf);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.White, rect), this._acceptableVariance);
+
+                rect = this.GetImagePart(image.Size, ImagePart.BottomRightQuadrant);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.White, rect), this._acceptableVariance);
+            });
+        }
+
+        [TestMethod]
+        public void ImageHandler_ReturnsCroppedImageForSize_LeftCenter()
+        {
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=lc,.5,.5&mbr=2";
+
+            this.ValidateCroppedImage(queryString, new Size(50, 50), (image) =>
+            {
+                // right half should be black
+                var rect = this.GetImagePart(image.Size, ImagePart.RightHalf);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.Black, rect), this._acceptableVariance);
+
+                // left half should be white
+                rect = this.GetImagePart(image.Size, ImagePart.LeftHalf);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.White, rect), this._acceptableVariance);
+            });
+        }
+
+        [TestMethod]
+        public void ImageHandler_ReturnsCroppedImageForSize_Center()
+        {
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=c,.5,.5&mbr=2";
+
+            this.ValidateCroppedImage(queryString, new Size(50, 50), (image) =>
+            {
+                // full image should be black
+                var rect = new Rectangle(0, 0, image.Width, image.Height);                
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.Black, rect), this._acceptableVariance);                
+            });
+        }
+
+        [TestMethod]
+        public void ImageHandler_ReturnsCroppedImageForSize_RightCenter()
+        {
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=rc,.5,.5&mbr=2";
+
+            this.ValidateCroppedImage(queryString, new Size(50, 50), (image) =>
+            {
+                // left half should be black
+                var rect = this.GetImagePart(image.Size, ImagePart.LeftHalf);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.Black, rect), this._acceptableVariance);
+
+                // right half should be white
+                rect = this.GetImagePart(image.Size, ImagePart.RightHalf);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.White, rect), this._acceptableVariance);
+            });
+        }
+
+        [TestMethod]
+        public void ImageHandler_ReturnsCroppedImageForSize_BottomLeft()
+        {
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=bl,.5,.5&mbr=2";
+
+            this.ValidateCroppedImage(queryString, new Size(50, 50), (image) =>
+            {
+                // top right quadrant should be black
+                var rect = this.GetImagePart(image.Size, ImagePart.TopRightQuandrant);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.Black, rect), this._acceptableVariance);
+
+                // top left and bottom half should be white
+                rect = this.GetImagePart(image.Size, ImagePart.TopLeftQuadrant);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.White, rect), this._acceptableVariance);
+
+                rect = this.GetImagePart(image.Size, ImagePart.BottomHalf);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.White, rect), this._acceptableVariance);
+            });
+        }
+
+        [TestMethod]
+        public void ImageHandler_ReturnsCroppedImageForSize_BottomCenter()
+        {
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=bc,.5,.5&mbr=2";
+
+            this.ValidateCroppedImage(queryString, new Size(50, 50), (image) =>
+            {
+                // top half should be black
+                var rect = this.GetImagePart(image.Size, ImagePart.TopHalf);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.Black, rect), this._acceptableVariance);
+
+                // bottom half should be white
+                rect = this.GetImagePart(image.Size, ImagePart.BottomHalf);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.White, rect), this._acceptableVariance);
+            });
+        }
+
+        [TestMethod]
+        public void ImageHandler_ReturnsCroppedImageForSize_BottomRight()
+        {
+            var queryString = "sz=10x10;20x20;100x100;200x200&cropspec=br,.5,.5&mbr=2";
+
+            this.ValidateCroppedImage(queryString, new Size(50, 50), (image) =>
+            {
+                // top left quadrant should be black
+                var rect = this.GetImagePart(image.Size, ImagePart.TopLeftQuadrant);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.Black, rect), this._acceptableVariance);
+
+                // bottom half and top right quadrant should be white
+                rect = this.GetImagePart(image.Size, ImagePart.BottomHalf);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.White, rect), this._acceptableVariance);
+
+                rect = this.GetImagePart(image.Size, ImagePart.TopRightQuandrant);
+                Assert.AreEqual(rect.Width * rect.Height, ResHelper.PixelCount(image, Color.White, rect), this._acceptableVariance);
             });
         }
 
         #endregion
 
-        #region [Support]
+        #region [Support Methods]
+
+        enum ImagePart
+        {
+            TopHalf,
+            BottomHalf,
+            LeftHalf,
+            RightHalf,
+            TopLeftQuadrant,
+            TopRightQuandrant,
+            BottomLeftQuadrant,
+            BottomRightQuadrant
+        }
+
+        private Rectangle GetImagePart(Size size, ImagePart part)
+        {
+            var rect = new Rectangle(0, 0, size.Width, size.Height);
+
+            switch(part)
+            {
+                case ImagePart.TopHalf:
+                    rect.Height /= 2;
+                    break;
+                case ImagePart.BottomHalf:                    
+                    rect.Height /= 2;
+                    rect.Y += rect.Height;
+                    break;
+                case ImagePart.LeftHalf:
+                    rect.Width /= 2;
+                    break;
+                case ImagePart.RightHalf:
+                    rect.Width /= 2;
+                    rect.X += rect.Width;
+                    break;
+                case ImagePart.TopLeftQuadrant:
+                    rect.Width /= 2;
+                    rect.Height /= 2;
+                    break;
+                case ImagePart.TopRightQuandrant:
+                    rect.Width /= 2;
+                    rect.Height /= 2;
+                    rect.X += rect.Width;
+                    break;
+                case ImagePart.BottomLeftQuadrant:
+                    rect.Width /= 2;
+                    rect.Height /= 2;
+                    rect.Y += rect.Height;
+                    break;
+                case ImagePart.BottomRightQuadrant:
+                    rect.Width /= 2;
+                    rect.Height /= 2;
+                    rect.X += rect.Width;
+                    rect.Y += rect.Height;
+                    break;
+            }
+
+            return rect;
+        }
 
         private void ValidateCroppedImage(string queryString, Size expectedSize, Action<Bitmap> postProcess, string imageFile = "croppable.jpg")
         {
@@ -256,35 +311,6 @@ namespace SlapCrop.Tests
                 Assert.AreEqual(200, context.Response.StatusCode);
                 Assert.AreEqual(mimeType, context.Response.ContentType);
             });
-        }
-
-        class TestImageHandler : ImageHandler
-        {
-            protected override ImageProcessRunner GetProcessRunner(HttpContextBase context)
-            {                
-                return new TestImageRunner(context);
-            }
-        }
-
-        class TestImageRunner : ImageProcessRunner
-        {
-            public TestImageRunner(HttpContextBase context)
-                : base(context)
-            {
-            }
-
-            protected override Bitmap GetSourceImage()
-            {
-                var filename = Path.GetFileName(this.Context.Request.Path);
-                try
-                {
-                    return ResHelper.LoadImage(filename);
-                }
-                catch (ArgumentException)
-                {
-                    return null;
-                }
-            }
         }
 
         #endregion

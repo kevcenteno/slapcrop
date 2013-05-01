@@ -39,7 +39,10 @@ namespace SlapCrop
         public Bitmap Scale(Bitmap image, int width, int height)
         {
             // guard clause for up-scaling: return a copy of the original
-            if (this.IsLargerThanSource(image, width, height)) return new Bitmap(image);
+            if (this.IsLargerThanSource(image, width, height) || new Size(width, height) == Size.Empty)
+            {
+                return new Bitmap(image);
+            }
 
             var scaled = new Bitmap(width, height);
 

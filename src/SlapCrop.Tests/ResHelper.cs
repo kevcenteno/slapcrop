@@ -14,7 +14,7 @@ namespace SlapCrop.Tests
         {
             var asm = Assembly.GetExecutingAssembly();
 
-            using (var stream = asm.GetManifestResourceStream("SlapCrop.Tests.resources." + name))
+            using (var stream = asm.GetManifestResourceStream("SlapCrop.Tests.Resources." + name))
             {
                 return new Bitmap(Bitmap.FromStream(stream));
             }

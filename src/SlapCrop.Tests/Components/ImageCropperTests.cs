@@ -7,11 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SlapCrop.Tests
+namespace SlapCrop.Tests.Components
 {
     [TestClass]
     public class ImageCropperTests
     {
+        private ImageCropper subject = new ImageCropper();
+
         [TestMethod]
         public void ImageCropper_ReturnsOriginalWhenWidthIsTooLarge()
         {
@@ -19,12 +21,11 @@ namespace SlapCrop.Tests
             Assert.AreEqual(300, source.Width);
             Assert.AreEqual(300, source.Height);
 
-            var cropper = new ImageCropper();
-            var result = cropper.Crop(source, new Rectangle(0, 0, 301, 100));
+            var result = this.subject.Crop(source, new Rectangle(0, 0, 301, 100));
             Assert.AreEqual(source, result);
 
             // even though we have a 300x300, this will be too big
-            result = cropper.Crop(source, new Rectangle(100, 0, 201, 100));
+            result = this.subject.Crop(source, new Rectangle(100, 0, 201, 100));
             Assert.AreEqual(source, result);
         }
 
@@ -32,13 +33,12 @@ namespace SlapCrop.Tests
         public void ImageCropper_ReturnsOriginalWhenHeightIsTooLarge()
         {
             var source = ResHelper.LoadImage("square.jpg");
-            var cropper = new ImageCropper();
 
-            var result = cropper.Crop(source, new Rectangle(0, 0, 100, 301));
+            var result = this.subject.Crop(source, new Rectangle(0, 0, 100, 301));
             Assert.AreEqual(source, result);
 
             // even though we have a 300x300, this will be too big
-            result = cropper.Crop(source, new Rectangle(0, 100, 100, 201));
+            result = this.subject.Crop(source, new Rectangle(0, 100, 100, 201));
             Assert.AreEqual(source, result);
         }
 
@@ -46,9 +46,8 @@ namespace SlapCrop.Tests
         public void ImageCropper_ReturnsCenterRect()
         {
             var source = ResHelper.LoadImage("croppable.jpg");
-            var cropper = new ImageCropper();
 
-            var result = cropper.Crop(source, ImageCropType.Center, 100, 100);
+            var result = this.subject.Crop(source, ImageCropType.Center, 100, 100);
             Assert.IsNotNull(result);
 
             // allow epsilon of width+height for rounding
@@ -115,9 +114,8 @@ namespace SlapCrop.Tests
         private void CropCornerAndTestForBlack(ImageCropType type, Rectangle blackRect, float blackPortion = 0.25f)
         {
             var source = ResHelper.LoadImage("croppable.jpg");
-            var cropper = new ImageCropper();
 
-            var result = cropper.Crop(source, type, 100, 100);
+            var result = this.subject.Crop(source, type, 100, 100);
             Assert.IsNotNull(result);
 
             // allowing 2 * width as epsilon to handle integer division / rounding

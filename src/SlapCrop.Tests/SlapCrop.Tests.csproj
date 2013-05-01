@@ -58,11 +58,15 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ColorUtilTests.cs" />
-    <Compile Include="ImageCropperTests.cs" />
+    <Compile Include="Components\ImageCropperTests.cs" />
+    <Compile Include="Components\ImageProcessRunnerTests.cs" />
     <Compile Include="ImageHandlerTests.cs" />
-    <Compile Include="ImageScalerTests.cs" />
+    <Compile Include="Components\ImageScalerTests.cs" />
+    <Compile Include="Mocks\TestImageHandler.cs" />
+    <Compile Include="Mocks\TestImageRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResHelper.cs" />
+    <Compile Include="Support\ImageProcessArgsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlapCrop\SlapCrop.csproj">
@@ -75,12 +79,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="resources\croppable.jpg" />
-    <EmbeddedResource Include="resources\landscape.jpg" />
-    <EmbeddedResource Include="resources\portrait.jpg" />
-    <EmbeddedResource Include="resources\sample.gif" />
-    <EmbeddedResource Include="resources\sample.png" />
-    <EmbeddedResource Include="resources\square.jpg" />
+    <EmbeddedResource Include="Resources\croppable.jpg" />
+    <EmbeddedResource Include="Resources\landscape.jpg" />
+    <EmbeddedResource Include="Resources\portrait.jpg" />
+    <EmbeddedResource Include="Resources\sample.gif" />
+    <EmbeddedResource Include="Resources\sample.png" />
+    <EmbeddedResource Include="Resources\square.jpg" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
