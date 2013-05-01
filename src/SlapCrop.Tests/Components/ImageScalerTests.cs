@@ -17,7 +17,7 @@ namespace SlapCrop.Tests.Components
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void ImageScaler_ThrowsExceptionWhenWidthIsTooLarger()
+        public void ImageScaler_ThrowsExceptionWhenWidthIsTooLarge()
         {
             var image = ResHelper.LoadImage("landscape.jpg");
             var result = this.subject.Scale(image, 601, 200);
@@ -26,7 +26,7 @@ namespace SlapCrop.Tests.Components
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void ImageScaler_ThrowsExceptionWhenHeightIsTooLarger()
+        public void ImageScaler_ThrowsExceptionWhenHeightIsTooLarge()
         {
             var image = ResHelper.LoadImage("landscape.jpg");
             var result = this.subject.Scale(image, 200, 401);

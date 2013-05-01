@@ -33,6 +33,37 @@ namespace SlapCrop.Tests
             });
         }
 
+        [TestMethod]
+        public void ImageHandler_Returns2xScaledImageWhenRequested()
+        {
+            // source image is 200x200, last value (requested) is too big
+            var queryString = "sz=10x10;20x20;30x30;100x100&mbr=desktop@2x";
+
+            // a 404 should be thrown here...
+            this.ValidateCroppedImage(queryString, new Size(200, 200), (image) => { });
+        }
+
+        [TestMethod]
+        public void ImageHandler_Returns2xScaledAndCroppedImageWhenRequested()
+        {
+            // source image is 200x200, last value (requested) is too big
+            var queryString = "sz=10x10;20x20;30x30;100x100&cropspec=c,.5,.5&mbr=desktop@2x";
+
+            // a 404 should be thrown here...
+            this.ValidateCroppedImage(queryString, new Size(100, 100), (image) => { });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(HttpException))]
+        public void ImageHandler_Returns400WhenScaledSizeIsTooLarge()
+        {
+            // source image is 200x200, last value (requested) is too big
+            var queryString = "sz=10x10;20x20;30x30;100x100&mbr=desktop@3x";
+
+            // a 404 should be thrown here...
+            this.ValidateCroppedImage(queryString, new Size(200, 200), (image) => { });
+        }
+
         #endregion
 
         #region [Image Cropping Tests]

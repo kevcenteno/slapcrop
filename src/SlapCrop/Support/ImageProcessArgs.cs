@@ -3,31 +3,32 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SlapCrop
 {
-    public class CropSpec
-    {
-        public float Width { get; set; }
-        public float Height { get; set; }
-        public ImageCropType Type { get; set; }
-    }
-
     public class ImageProcessArgs
     {
         protected static readonly string SIZE_PARAM = "sz";
         protected static readonly string CROP_PARAM = "cropspec";
         protected static readonly string MBR_PARAM = "mbr";
 
+        #region [Properties]
+        
         public Size[] Sizes { get; protected set; }
 
-        public CropSpec[] Crops { get; protected set; }
+        public ImageCropSpec[] Crops { get; protected set; }
 
         public int MediaBreakpoint { get; protected set; }
 
+        public int PixelDensity { get; private set; }
+
+        #endregion
+
         public void Parse(string queryStringParameters)
         {
+            this.PixelDensity = 1;
             this.Sizes = Enumerable.Empty<Size>().ToArray();
 
             var pairs = this.MakeParameters(queryStringParameters);
@@ -35,6 +36,8 @@ namespace SlapCrop
             this.ParseSizes(pairs);
             this.ParseMediaBreakpoint(pairs);
             this.ParseCropSpec(pairs);
+
+            this.ScaleForPixelDensity();
         }
 
         public ImageProcessTarget CreateTarget()
@@ -44,21 +47,16 @@ namespace SlapCrop
                 return ImageProcessTarget.Empty;
             }
 
-            var crop = new CropSpec();
+            var crop = new ImageCropSpec();
             crop.Type = ImageCropType.None;
             crop.Width = 1.0f;
             crop.Height = 1.0f;
 
             if (this.Crops != null)
             {
-                if (this.Crops.Length == 1)
-                {
-                    crop = this.Crops[0];
-                }
-                else
-                {
-                    crop = this.Crops[this.MediaBreakpoint];
-                }
+                crop = (this.Crops.Length == 1) ? 
+                    this.Crops[0] : 
+                    this.Crops[this.MediaBreakpoint];
             }
 
             var target = new ImageProcessTarget(
@@ -71,6 +69,8 @@ namespace SlapCrop
             return target;
         }
 
+        #region [Parameter Parsers]
+        
         protected virtual void ParseSizes(Dictionary<string, string> pairs)
         {
             // don't bother if empty
@@ -104,7 +104,19 @@ namespace SlapCrop
                 var key = pairs[MBR_PARAM];
                 if (!string.IsNullOrEmpty(key))
                 {
-                    this.MediaBreakpoint = int.Parse(ImageConfigSection.Instance.Breakpoints[key].Value);
+                    var regex = new Regex(@"\@(\d)x$", RegexOptions.IgnoreCase);
+                    if (!regex.IsMatch(key))
+                    {
+                        this.MediaBreakpoint = int.Parse(ImageConfigSection.Instance.Breakpoints[key].Value);
+                    }
+                    else
+                    {
+                        // update the pixel density
+                        this.PixelDensity = int.Parse(regex.Match(key).Groups[1].Value);
+
+                        key = key.Substring(0, key.LastIndexOf("@"));
+                        this.MediaBreakpoint = int.Parse(ImageConfigSection.Instance.Breakpoints[key].Value);
+                    }
                 }
             }
         }
@@ -114,13 +126,13 @@ namespace SlapCrop
             if (pairs.ContainsKey(CROP_PARAM))
             {
                 var details = pairs[CROP_PARAM].Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);                
-                this.Crops = new CropSpec[details.Length];
+                this.Crops = new ImageCropSpec[details.Length];
 
                 for (int i = 0; i < this.Crops.Length; i++)
                 {
                     if (details[i].Equals("skip"))
                     {
-                        this.Crops[i] = new CropSpec
+                        this.Crops[i] = new ImageCropSpec
                         {
                             Width = 1.0f,
                             Height = 1.0f,
@@ -134,13 +146,29 @@ namespace SlapCrop
                         var widthScale = float.Parse(parts[1]);
                         var heightScale = float.Parse(parts[2]);
 
-                        this.Crops[i] = new CropSpec
+                        this.Crops[i] = new ImageCropSpec
                         {
                             Width = Math.Min(1.0f, widthScale),
                             Height = Math.Min(1.0f, heightScale),
                             Type = this.GetCropType(parts[0])
                         };
                     }
+                }
+            }
+        }
+
+        #endregion
+
+        #region [Support Methods]
+        
+        protected virtual void ScaleForPixelDensity()
+        {
+            if (this.PixelDensity > 1)
+            {
+                for (int i = 0; i < this.Sizes.Length; i++)
+                {
+                    this.Sizes[i].Width *= this.PixelDensity;
+                    this.Sizes[i].Height *= this.PixelDensity;
                 }
             }
         }
@@ -181,5 +209,7 @@ namespace SlapCrop
             }
             return pairs;
         }
+
+        #endregion
     }
 }
