@@ -1,0 +1,28 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>SlapCrop Sample Site</title>
+</head>
+<body>
+    <div>
+        <div>
+            @* SlapCrop query string will be ignored if the image is not routed through the handler *@
+            <img src="/Images/300.gif?sz=10x10;20x20;30x30;100x100" />
+        </div>
+        <div>
+            @* using SlapCrop to serve a local image *@
+            <img src="/slapcrop/?src=/Images/300.gif&sz=10x10;20x20;30x30;100x100" />
+        </div>
+        <div>
+            @* using SlapCrop to serve a remote image *@
+            <img src="/slapcrop/?src=http://placehold.it/300&sz=10x10;20x20;30x30;100x100" />
+        </div>
+    </div>
+</body>
+</html>
