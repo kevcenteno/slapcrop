@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>SlapCrop</id>
+    <version>1.0.0</version>
+    <authors>dkatz</authors>
+    <owners>Shaw Media</owners>
+    <projectUrl>http://shawonex.github.io/slapcrop/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Process remote images, and serve them as local assets, by appending query string parameters to image path.</description>
+    <releaseNotes>Initial release.</releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <tags>responsive imagehandler</tags>
+  </metadata>
+</package>
