@@ -161,7 +161,14 @@ namespace SlapCrop
             var codec = ImageCodecInfo.GetImageEncoders().First(c => c.MimeType.Equals(response.ContentType));
             var encoderParams = new EncoderParameters(1);
             encoderParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 100L);
-            image.Save(response.OutputStream, codec, encoderParams);            
+            if (response.ContentType != "image/png")
+            {
+                image.Save(response.OutputStream, codec, encoderParams);                
+            } 
+            else 
+            {
+                image.Save(response.OutputStream, ImageFormat.Png);
+            }
         }
                 
         /// <summary>
