@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -214,7 +215,11 @@ namespace SlapCrop
             } 
             else 
             {
-                image.Save(response.OutputStream, ImageFormat.Png);
+                using (MemoryStream MemStream = new MemoryStream())
+                {
+                    image.Save(MemStream, ImageFormat.Png);
+                    MemStream.WriteTo(response.OutputStream);
+                }
             }
         }
                 
