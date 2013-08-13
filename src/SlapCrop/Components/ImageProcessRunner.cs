@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Net;
 using System.Web;
 
 namespace SlapCrop
@@ -83,7 +85,52 @@ namespace SlapCrop
         /// <returns></returns>
         protected virtual Bitmap GetSourceImage()
         {
-            return null;
+            var imageSrc = this.Context.Request.Path;
+
+            // compare first segment with list of keys from settings
+            var segments = imageSrc.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (segments.Length > 0)
+            {
+                var remoteMapping = segments[0];
+                string imgPath = string.Empty;
+
+                for (int i = 1; i < segments.Length; i++)
+                {
+                    imgPath += string.Format("/{0}", segments[i]);
+                }
+
+                // if the image request is from a remote server, request the image and return that
+                foreach (KeyValueConfigurationElement source in ImageConfigSection.Instance.Sources)
+                {
+                    if (remoteMapping.Equals(source.Key, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var imgUrl = string.Format("{0}{1}", source.Value, imgPath);
+
+                        var httpWebRequest = (HttpWebRequest)WebRequest.Create(imgUrl);
+                        httpWebRequest.Timeout = ImageConfigSection.Instance.Timeout;
+
+                        try
+                        {
+                            return (Bitmap)Image.FromStream(httpWebRequest.GetResponse().GetResponseStream());
+                        }
+                        catch (System.Net.WebException)
+                        {
+                            throw new HttpException(404, "The specified resource was not found");
+                        }
+                    }
+                }
+            }
+
+            // otherwise, assume the request is for a local image and return that
+            try
+            {
+                return (Bitmap)Image.FromFile(this.Context.Request.PhysicalApplicationPath + imageSrc);
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                throw new HttpException(404, "The specified resource was not found");
+            }
         }
 
         /// <summary>

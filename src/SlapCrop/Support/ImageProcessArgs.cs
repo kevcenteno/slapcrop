@@ -15,7 +15,7 @@ namespace SlapCrop
         protected static readonly string MBR_PARAM = "mbr";
 
         #region [Properties]
-        
+
         public Size[] Sizes { get; protected set; }
 
         public ImageCropSpec[] Crops { get; protected set; }
@@ -32,7 +32,7 @@ namespace SlapCrop
             this.Sizes = Enumerable.Empty<Size>().ToArray();
 
             var pairs = this.MakeParameters(queryStringParameters);
-            
+
             this.ParseSizes(pairs);
             this.ParseMediaBreakpoint(pairs);
             this.ParseCropSpec(pairs);
@@ -69,8 +69,8 @@ namespace SlapCrop
             return target;
         }
 
-        #region [Parameter Parsers]
-        
+        #region [Parameter Parsers]   
+
         protected virtual void ParseSizes(Dictionary<string, string> pairs)
         {
             // don't bother if empty
